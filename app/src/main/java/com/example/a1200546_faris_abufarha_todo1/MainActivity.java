@@ -5,20 +5,16 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
 
     public static String firstName;
     public static String lastName;
     public static String id;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,23 +31,28 @@ public class MainActivity extends AppCompatActivity {
         submitFormButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                firstName = firstNameEditText.getText().toString().trim();
+                lastName = lastNameEditText.getText().toString().trim();
+                id = idEditText.getText().toString().trim();
 
-                firstName = firstNameEditText.getText().toString();
-                lastName = lastNameEditText.getText().toString();
-                id = idEditText.getText().toString();
+                // Check if any field is empty
+                if (firstName.isEmpty() || lastName.isEmpty() || id.isEmpty()) {
+                    Toast.makeText(MainActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+                }
+                // Check if the ID is a valid integer
+                else {
+                    try {
+                        Integer.parseInt(id); // Try to parse the ID as an integer
 
-                Intent intent = new Intent(MainActivity.this, HangmanActivity.class);
-                startActivity(intent);
-
-
+                        // If valid, proceed to the HangmanActivity
+                        Intent intent = new Intent(MainActivity.this, HangmanActivity.class);
+                        startActivity(intent);
+                    } catch (NumberFormatException e) {
+                        // If ID is not a valid integer, show an error message
+                        Toast.makeText(MainActivity.this, "ID must be a valid integer", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         });
-
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-//            return insets;
-//        });
-
     }
 }
