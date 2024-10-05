@@ -30,37 +30,31 @@ public class HangmanActivity extends AppCompatActivity {
 
     private int tries = 0;
 
+
+
+    private TextView fullNameTextView;
+    private TextView idHangmanTextView;
+    private TextView progressTextView;
+    private ArrayList<TextView> hangManTextViewsArrayList;
+    private ArrayList<EditText> guessTextViewsArrayList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_hangman);
 
-        TextView fullNameTextView = findViewById(R.id.textView_fullName);
-        TextView idHangmanTextView = findViewById(R.id.textView_hangmanID);
-        TextView progressTextView = findViewById(R.id.textView_progress);
 
-        ArrayList<TextView> hangManTextViewsArrayList = new ArrayList<>();
-        hangManTextViewsArrayList.add(findViewById(R.id.textView_hangmanHead));
-        hangManTextViewsArrayList.add(findViewById(R.id.textView_hangmanBody));
-        hangManTextViewsArrayList.add(findViewById(R.id.textView_hangmanRightArm));
-        hangManTextViewsArrayList.add(findViewById(R.id.textView_hangmanLeftArm));
-        hangManTextViewsArrayList.add(findViewById(R.id.textView_hangmanRightLeg));
-        hangManTextViewsArrayList.add(findViewById(R.id.textView_hangmanLeftLeg));
+        fullNameTextView = getFullNameTextView();
+        idHangmanTextView = getIdHangmanTextView();
+        progressTextView = getProgressTextView();
+        hangManTextViewsArrayList = getHangmanTextViews();
+        guessTextViewsArrayList = getGuessTextViews();
 
-        ArrayList<EditText> guessTextViewsArrayList = new ArrayList<>();
-        guessTextViewsArrayList.add(findViewById(R.id.editText_letter0));
-        guessTextViewsArrayList.add(findViewById(R.id.editText_letter1));
-        guessTextViewsArrayList.add(findViewById(R.id.editText_letter2));
-        guessTextViewsArrayList.add(findViewById(R.id.editText_letter3));
-        guessTextViewsArrayList.add(findViewById(R.id.editText_letter4));
-        guessTextViewsArrayList.add(findViewById(R.id.editText_letter5));
-        guessTextViewsArrayList.add(findViewById(R.id.editText_letter6));
 
         startGame(hangManTextViewsArrayList);
         showNameID(fullNameTextView, idHangmanTextView);
         showHangman(hangManTextViewsArrayList, tries);
-
         Button submitButton = findViewById(R.id.button_submitGuess);
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,6 +77,44 @@ public class HangmanActivity extends AppCompatActivity {
 
 
 
+
+    // Function to retrieve TextViews for full name, ID, and progress
+    private TextView getFullNameTextView() {
+        return findViewById(R.id.textView_fullName);
+    }
+
+    private TextView getIdHangmanTextView() {
+        return findViewById(R.id.textView_hangmanID);
+    }
+
+    private TextView getProgressTextView() {
+        return findViewById(R.id.textView_progress);
+    }
+
+    // Function to retrieve hangman body parts TextViews
+    private ArrayList<TextView> getHangmanTextViews() {
+        ArrayList<TextView> hangmanTextViews = new ArrayList<>();
+        hangmanTextViews.add(findViewById(R.id.textView_hangmanHead));
+        hangmanTextViews.add(findViewById(R.id.textView_hangmanBody));
+        hangmanTextViews.add(findViewById(R.id.textView_hangmanRightArm));
+        hangmanTextViews.add(findViewById(R.id.textView_hangmanLeftArm));
+        hangmanTextViews.add(findViewById(R.id.textView_hangmanRightLeg));
+        hangmanTextViews.add(findViewById(R.id.textView_hangmanLeftLeg));
+        return hangmanTextViews;
+    }
+
+    // Function to retrieve guess EditTexts
+    private ArrayList<EditText> getGuessTextViews() {
+        ArrayList<EditText> guessTextViews = new ArrayList<>();
+        guessTextViews.add(findViewById(R.id.editText_letter0));
+        guessTextViews.add(findViewById(R.id.editText_letter1));
+        guessTextViews.add(findViewById(R.id.editText_letter2));
+        guessTextViews.add(findViewById(R.id.editText_letter3));
+        guessTextViews.add(findViewById(R.id.editText_letter4));
+        guessTextViews.add(findViewById(R.id.editText_letter5));
+        guessTextViews.add(findViewById(R.id.editText_letter6));
+        return guessTextViews;
+    }
 
 
 
@@ -120,27 +152,67 @@ public class HangmanActivity extends AppCompatActivity {
     private void checkSubmission(ArrayList<EditText> guessTextViewsArrayList, ArrayList<TextView> hangManTextViewsArrayList, TextView progressTextView) {
         String submission = editTextToString(guessTextViewsArrayList).toLowerCase();
 
+        // Check if the submission length matches the word length
         if (submission.length() != WORD.length()) {
             progressTextView.setText("Please enter the full word.");
             return;
         }
 
+        // If the player guessed the correct word
         if (WORD.equals(submission)) {
             progressTextView.setText(CONGRATULATIONS);
             Toast.makeText(this, "You win!", Toast.LENGTH_SHORT).show();
+            finish(); // End the activity since the player won
         } else {
-            tries++;
+            tries++; // Increment the number of wrong tries
+            showHangman(hangManTextViewsArrayList, tries); // Show the next part of the hangman
 
-            showHangman(hangManTextViewsArrayList, tries);
-
+            // If the player has used all their tries
             if (tries >= MAXIMUM_TRIES) {
                 progressTextView.setText(GAME_OVER);
-                Toast.makeText(this, "You lost!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "You lost! The correct word was: " + WORD, Toast.LENGTH_SHORT).show();
+                finish(); // End the activity since the player lost
             } else {
+                // Update progress to show remaining tries
                 progressTextView.setText("Wrong guess! Tries left: " + (MAXIMUM_TRIES - tries));
             }
         }
     }
+
+
+
+
+
+
+
+    private void checkSubmission(ArrayList<EditText> guessTextViewsArrayList, ArrayList<TextView> hangManTextViewsArrayList, TextView progressTextView, Integer tries) {
+        String submission = editTextToString(guessTextViewsArrayList);
+
+        if (submission.length() != 1 || submission.equals("-------")) {
+            progressTextView.setText("Please enter a valid guess!");
+            return;
+        }
+
+        if (WORD.equals(submission)) {
+            progressTextView.setText(CONGRATULATIONS);
+            Toast.makeText(this, "You guessed the word! Congratulations!", Toast.LENGTH_SHORT).show();
+            finish(); // End the program only if the user wins
+        } else {
+            progressTextView.setText("Try again!");
+            tries++;
+
+            // Show the next part of the hangman
+            showHangman(hangManTextViewsArrayList, tries);
+
+            // Check if the player has reached the maximum number of tries
+            if (tries >= MAXIMUM_TRIES) {
+                progressTextView.setText(GAME_OVER);
+                Toast.makeText(this, "Game Over! The correct word was: " + WORD, Toast.LENGTH_SHORT).show();
+                // Do not call finish() here; let the user restart the game without ending the app
+            }
+        }
+    }
+
 
 
     private String editTextToString(ArrayList<EditText> guessTextViewsArrayList) {
